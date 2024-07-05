@@ -1,5 +1,5 @@
 datasets
 transformers
-psycopg2_binary
+psycopg
 sentence-transformers
 sqlalchemy
