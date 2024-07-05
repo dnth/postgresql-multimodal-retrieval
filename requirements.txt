@@ -1,0 +1,4 @@
+datasets
+transformers
+psycopg2_binary
+sentence-transformers

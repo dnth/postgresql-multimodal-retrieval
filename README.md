@@ -33,10 +33,15 @@ pg_ctl -D mylocal_db -l logfile start
 ### Create a database
 
 ```bash
+createuser pokemon_user
 createdb pokemon_db
 ```
 
+## Install packages
 
+```bash
+pip install -r requirements.txt
+```
 
 ## References
 
