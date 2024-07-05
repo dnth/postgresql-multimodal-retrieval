@@ -1,3 +1,7 @@
+# postgresql
+mylocal_db/
+logfile
+
 # Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[cod]

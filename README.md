@@ -2,6 +2,42 @@
 Multimodal retrieval using Vision Language Model with PostgreSQL database.
 
 
+## Setting up
+
+### Create a conda environment
+
+```bash
+conda create -n postgresql-multimodal python=3.10
+conda activate postgresql-multimodal
+```
+### Install PostgreSQL
+
+```bash
+conda install -c conda-forge postgresql
+psql --version
+```
+
+### Install pgvector
+
+```bash
+conda install -c conda-forge pgvector
+```
+
+### Initialize and start PostgreSQL
+
+```bash
+initdb -D mylocal_db
+pg_ctl -D mylocal_db -l logfile start
+```
+
+### Create a database
+
+```bash
+createdb pokemon_db
+```
+
+
+
 ## References
 
 + https://minimaxir.com/2024/06/pokemon-embeddings/
