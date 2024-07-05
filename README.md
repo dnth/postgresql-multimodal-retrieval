@@ -9,4 +9,5 @@ Multimodal retrieval using Vision Language Model with PostgreSQL database.
 + https://towardsdatascience.com/quick-fire-guide-to-multi-modal-ml-with-openais-clip-2dad7e398ac0
 + https://github.com/pgvector/pgvector
 + https://huggingface.co/nomic-ai
++ https://huggingface.co/datasets/wanghaofan/pokemon-wiki-captions
   
