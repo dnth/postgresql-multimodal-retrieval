@@ -3,7 +3,7 @@ mylocal_db/
 logfile
 
 # images
-saved_images/
+saved_images*
 
 # Byte-compiled / optimized / DLL files
 __pycache__/
