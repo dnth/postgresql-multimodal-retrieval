@@ -8,6 +8,7 @@ Multimodal retrieval using Vision Language Model with PostgreSQL database - A fu
 Features:
 + Image to image search
 + Text to image search
++ Hybrid search
 
 ## Setting up
 
