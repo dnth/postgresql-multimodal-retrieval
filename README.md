@@ -84,4 +84,5 @@ outputs
 + https://github.com/pgvector/pgvector
 + https://huggingface.co/nomic-ai
 + https://huggingface.co/datasets/wanghaofan/pokemon-wiki-captions
+https://github.com/jamescalam/clip-demos/blob/main/tutorials/00-get-started/00-get-started.ipynb
   
