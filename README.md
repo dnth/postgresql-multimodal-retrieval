@@ -80,6 +80,7 @@ outputs
 ```
 
 ### Compute embeddings
+See [notebook](notebooks/compute_embedding_into_progress.ipynb).
 
 ### Query
 
