@@ -84,6 +84,7 @@ outputs
 See [notebook](notebooks/compute_embedding_into_progress.ipynb).
 
 ### Query
+See [notebook](notebooks/query.ipynb).
 
 ## References
 

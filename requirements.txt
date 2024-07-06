@@ -4,3 +4,4 @@ psycopg
 sentence-transformers
 sqlalchemy
 matplotlib
+pgvector
