@@ -1,6 +1,13 @@
 # postgresql-multimodal-retrieval
-Multimodal retrieval using Vision Language Model with PostgreSQL database.
+Multimodal retrieval using Vision Language Model with PostgreSQL database - A full stack implementation.
 
++ Database: PostgreSQL
++ Vision Language Model: CLIP
++ Frontend: Flet 
+
+Features:
++ Image to image search
++ Text to image search
 
 ## Setting up
 
