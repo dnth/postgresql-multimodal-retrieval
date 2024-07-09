@@ -1,14 +1,14 @@
 import os
 
 import numpy as np
+import psycopg
 import torch
 from datasets import load_dataset
 from loguru import logger
+from pgvector.psycopg import register_vector
 from tqdm.auto import tqdm
 from transformers import CLIPModel, CLIPProcessor, CLIPTokenizerFast
 
-import psycopg
-from pgvector.psycopg import register_vector
 
 def save_image_to_disk(example, save_dir):
     filename = f"{example['image_id']}.jpg"
@@ -54,15 +54,16 @@ def compute_embeddings(images, processor, model, device, batch_size=128):
     logger.info(f"Finished processing. Final embedding shape: {image_arr.shape}")
     return image_arr
 
+
 def insert_to_db(dataset, embeddings):
-    df = dataset['train'].to_pandas()
-    df = df.drop(columns=['image'])
-    
-    df['image_filepath'] = df['image_filepath'].apply(lambda x: x.split('/')[-1])
+    df = dataset["train"].to_pandas()
+    df = df.drop(columns=["image"])
 
-    df['img_emb'] = embeddings.T.tolist()
+    df["image_filepath"] = df["image_filepath"].apply(lambda x: x.split("/")[-1])
 
-    conn = psycopg.connect(dbname='retrieval_db')
+    df["img_emb"] = embeddings.T.tolist()
+
+    conn = psycopg.connect(dbname="retrieval_db")
     cur = conn.cursor()
     cur.execute("CREATE EXTENSION IF NOT EXISTS vector")
 
@@ -91,16 +92,16 @@ def insert_to_db(dataset, embeddings):
     # Convert dataframe to list of tuples
     data = []
     for _, row in df.iterrows():
-        
-        data.append((
-            row['image_id'],
-            row['coco_url'],
-            row['caption'],
-            row['recaption'],
-            row['image_filepath'],
-            row['img_emb']
-        ))
-
+        data.append(
+            (
+                row["image_id"],
+                row["coco_url"],
+                row["caption"],
+                row["recaption"],
+                row["image_filepath"],
+                row["img_emb"],
+            )
+        )
 
     cur.executemany(insert_sql, data)
     conn.commit()
@@ -142,7 +143,6 @@ def main():
     # insert embeddings to database
     logger.info("Inserting embeddings to database")
     insert_to_db(dataset, image_arr)
-
 
 
 if __name__ == "__main__":
