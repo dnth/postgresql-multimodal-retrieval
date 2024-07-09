@@ -2,8 +2,9 @@
 Multimodal retrieval using Vision Language Model with PostgreSQL database - A full stack implementation.
 
 + Database: PostgreSQL
-+ Vision Language Model: CLIP
-+ Frontend: Flet 
++ Vision Language Model: OpenAI CLIP (`transformers` implementation) 
++ Dataset: Hugging Face Datasets
++ Frontend: Flet / Gradio
 + Deployment: Docker
 + Infrastructure: Hugging Face Spaces
 
@@ -43,8 +44,8 @@ pg_ctl -D mylocal_db -l logfile start
 ### Create a database
 
 ```bash
-createuser pokemon_user
-createdb pokemon_db -O pokemon_user
+createuser retrieval_user
+createdb retrieval_db -O retrieval_user
 ```
 
 ### Install packages
@@ -62,11 +63,11 @@ See [notebook](notebooks/load_dataset_into_postgres.ipynb).
 Check database for inserted contents:
 
 ```
-psql -d pokemon_db -U pokemon_user
+psql -d retrieval_db -U retrieval_user
 ```
 
 ```
-select * from pokemons limit 5;
+select * image_metadata from  limit 5;
 ```
 
 outputs
@@ -83,7 +84,13 @@ outputs
 ```
 
 ### Compute embeddings
-See [notebook](notebooks/compute_embedding_into_progress.ipynb).
+Run 
+
+```
+python compute_embeddings.py
+```
+
+This will compute embeddings for all the images in the database and store them in the `image_embeddings.npy` numpy array.
 
 ### Query
 See [notebook](notebooks/query.ipynb).
