@@ -63,7 +63,7 @@ See [notebook](notebooks/load_dataset_into_postgres.ipynb).
 Check database for inserted contents:
 
 ```
-psql -d retrieval_db -U retrieval_user
+psql -d retrieval_db
 ```
 
 ```

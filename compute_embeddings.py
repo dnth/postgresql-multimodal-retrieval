@@ -7,6 +7,8 @@ from loguru import logger
 from tqdm.auto import tqdm
 from transformers import CLIPModel, CLIPProcessor, CLIPTokenizerFast
 
+import psycopg
+from pgvector.psycopg import register_vector
 
 def save_image_to_disk(example, save_dir):
     filename = f"{example['image_id']}.jpg"
@@ -52,6 +54,62 @@ def compute_embeddings(images, processor, model, device, batch_size=128):
     logger.info(f"Finished processing. Final embedding shape: {image_arr.shape}")
     return image_arr
 
+def insert_to_db(dataset, embeddings):
+    df = dataset['train'].to_pandas()
+    df = df.drop(columns=['image'])
+    
+    df['image_filepath'] = df['image_filepath'].apply(lambda x: x.split('/')[-1])
+
+    df['img_emb'] = embeddings.T.tolist()
+
+    conn = psycopg.connect(dbname='retrieval_db')
+    cur = conn.cursor()
+    cur.execute("CREATE EXTENSION IF NOT EXISTS vector")
+
+    register_vector(conn)
+
+    # Drop the existing table if it exists and create a new one
+    cur.execute("""
+    DROP TABLE IF EXISTS image_metadata;
+
+    CREATE TABLE image_metadata (
+        image_id INTEGER PRIMARY KEY,
+        coco_url TEXT,
+        caption TEXT,
+        recaption TEXT,
+        image_filepath TEXT,
+        img_emb vector(512)
+    )
+    """)
+
+    # Prepare the insert statement
+    insert_sql = """
+    INSERT INTO image_metadata (image_id, coco_url, caption, recaption, image_filepath, img_emb)
+    VALUES (%s, %s, %s, %s, %s, %s)
+    """
+
+    # Convert dataframe to list of tuples
+    data = []
+    for _, row in df.iterrows():
+        
+        data.append((
+            row['image_id'],
+            row['coco_url'],
+            row['caption'],
+            row['recaption'],
+            row['image_filepath'],
+            row['img_emb']
+        ))
+
+
+    cur.executemany(insert_sql, data)
+    conn.commit()
+
+    cur.close()
+    conn.close()
+
+    logger.info("Table dropped, recreated, and data inserted successfully!")
+
 
 def main():
     logger.info("Loading dataset")
@@ -80,6 +138,11 @@ def main():
     embeddings_file = "image_embeddings.npy"
     np.save(embeddings_file, image_arr)
     logger.info(f"Embeddings saved to {embeddings_file}")
+
+    # insert embeddings to database
+    logger.info("Inserting embeddings to database")
+    insert_to_db(dataset, image_arr)
+
 
 
 if __name__ == "__main__":
