@@ -99,7 +99,7 @@ Run
 python query.py "a cat and flower"
 ```
 
-![result](images/result.png)
+![result](images/results.png)
 
 ## References
 
