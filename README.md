@@ -90,10 +90,14 @@ Run
 python compute_embeddings.py
 ```
 
-This will compute embeddings for all the images in the database and store them in the `image_embeddings.npy` numpy array.
+This will compute embeddings for all the images in the database.
 
 ### Query
-See [notebook](notebooks/query.ipynb).
+Run
+
+```
+python query.py "a cat and flower"
+```
 
 ## References
 
