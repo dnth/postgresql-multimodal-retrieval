@@ -72,14 +72,32 @@ def print_results(results):
         print("document:", row[0], "RRF score:", row[1])
 
 
+import math
+import matplotlib.pyplot as plt
+import matplotlib.image as mpimg
+
 def plot_results(results, image_dir="./saved_images_coco_30k/"):
-    fig, axs = plt.subplots(1, 10)
+    num_images = len(results)
+    num_cols = 4
+    num_rows = math.ceil(num_images / num_cols)
+    
+    fig, axs = plt.subplots(num_rows, num_cols, figsize=(15, 5 * num_rows))
+    axs = axs.flatten()  # Flatten the 2D array of axes to make indexing easier
+    
     for i, row in enumerate(results):
+        if i >= len(axs):
+            break
+        
         image_filename = row[1]
         image_filepath = f"{image_dir}{image_filename}"
         img = mpimg.imread(image_filepath)
         axs[i].imshow(img)
         axs[i].axis("off")
+    
+    # Hide any unused subplots
+    for j in range(i + 1, len(axs)):
+        axs[j].axis("off")
+        axs[j].set_visible(False)
     
     plt.tight_layout()
     plt.savefig("images/results.png")

@@ -121,7 +121,7 @@ def main():
     logger.info(f"Saving images to {save_dir}")
 
     # Only process the first 100 images for testing and debugging
-    dataset["train"] = dataset["train"].select(range(100))
+    # dataset["train"] = dataset["train"].select(range(100))
     dataset = dataset.map(lambda x: save_image_to_disk(x, save_dir))
 
     logger.info("Extracting images from dataset")
