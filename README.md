@@ -99,6 +99,8 @@ Run
 python query.py "a cat and flower"
 ```
 
+![result](images/result.png)
+
 ## References
 
 + https://minimaxir.com/2024/06/pokemon-embeddings/
