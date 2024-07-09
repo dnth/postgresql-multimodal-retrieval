@@ -73,16 +73,18 @@ def print_results(results):
 
 
 def plot_results(results, image_dir="./saved_images_coco_30k/"):
-    fig, axs = plt.subplots(1, 10, figsize=(20, 20))
+    fig, axs = plt.subplots(1, 10)
     for i, row in enumerate(results):
         image_filename = row[1]
         image_filepath = f"{image_dir}{image_filename}"
         img = mpimg.imread(image_filepath)
         axs[i].imshow(img)
         axs[i].axis("off")
+    
+    plt.tight_layout()
+    plt.savefig("images/results.png")
     plt.show()
-    # save plot to disk
-    plt.savefig("results.png")
+    
 
 
 def parse_arguments():
