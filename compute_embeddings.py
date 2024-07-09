@@ -73,6 +73,9 @@ def main():
 
     image_arr = compute_embeddings(images, processor, model, device)
 
+    # Normalize embeddings
+    image_arr = image_arr.T / np.linalg.norm(image_arr, axis=1)
+
     # Save embeddings to a .npy file
     embeddings_file = "image_embeddings.npy"
     np.save(embeddings_file, image_arr)
