@@ -4,6 +4,8 @@ Multimodal retrieval using Vision Language Model with PostgreSQL database - A fu
 + Database: PostgreSQL
 + Vision Language Model: CLIP
 + Frontend: Flet 
++ Deployment: Docker
++ Infrastructure: Hugging Face Spaces
 
 Features:
 + Image to image search
