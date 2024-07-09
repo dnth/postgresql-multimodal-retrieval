@@ -5,3 +5,4 @@ sentence-transformers
 sqlalchemy
 matplotlib
 pgvector
+loguru
