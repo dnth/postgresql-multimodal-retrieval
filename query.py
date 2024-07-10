@@ -25,10 +25,10 @@ def get_sql_query(num_results: int = 12):
         LIMIT 20
     ),
     keyword_search AS (
-        SELECT image_id, image_filepath, RANK () OVER (ORDER BY ts_rank_cd(to_tsvector('english', caption), query) DESC)
+        SELECT image_id, image_filepath, RANK () OVER (ORDER BY ts_rank_cd(to_tsvector('english', recaption), query) DESC)
         FROM image_metadata, plainto_tsquery('english', %(query)s) query
-        WHERE to_tsvector('english', caption) @@ query
-        ORDER BY ts_rank_cd(to_tsvector('english', caption), query) DESC
+        WHERE to_tsvector('english', recaption) @@ query
+        ORDER BY ts_rank_cd(to_tsvector('english', recaption), query) DESC
         LIMIT 20
     )
     SELECT

@@ -66,7 +66,7 @@ python compute_embeddings.py
 This will compute embeddings for all the images in the database.
 
 ### Query
-Run
+Run hybrid search (vector search and keyword search). The results are ranked using RRF.
 
 ```
 python query.py "a cat and flower" --num_results 12
