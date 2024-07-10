@@ -74,6 +74,13 @@ python query.py "a cat and flower" --num_results 12
 
 ![result](images/results.png)
 
+### Gradio App
+
+
+https://github.com/dnth/postgresql-multimodal-retrieval/assets/6821286/d658b5e4-0104-4733-a496-1d5fb88fc204
+
+
+
 ## References
 
 + https://minimaxir.com/2024/06/pokemon-embeddings/
