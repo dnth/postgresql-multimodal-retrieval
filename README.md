@@ -96,7 +96,7 @@ This will compute embeddings for all the images in the database.
 Run
 
 ```
-python query.py "a cat and flower"
+python query.py "a cat and flower" --num_results 12
 ```
 
 ![result](images/results.png)
