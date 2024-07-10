@@ -80,6 +80,13 @@ Run
 python gradio_app.py
 ```
 
+### Flet App
+
+```
+flet run flet_app.py
+```
+
+![alt text](images/flet_app.png)
 
 
 <video controls autoplay src="https://github.com/dnth/postgresql-multimodal-retrieval/assets/6821286/7da5f312-fb3c-448b-b890-69e01d7b9562"></video>
