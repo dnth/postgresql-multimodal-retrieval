@@ -75,9 +75,13 @@ python query.py "a cat and flower" --num_results 12
 ![result](images/results.png)
 
 ### Gradio App
+Run
+```
+python gradio_app.py
+```
 
+https://github.com/dnth/postgresql-multimodal-retrieval/assets/6821286/7da5f312-fb3c-448b-b890-69e01d7b9562
 
-https://github.com/dnth/postgresql-multimodal-retrieval/assets/6821286/d658b5e4-0104-4733-a496-1d5fb88fc204
 
 
 
