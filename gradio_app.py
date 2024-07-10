@@ -1,5 +1,8 @@
 import argparse
+import math
+import os
 
+import gradio as gr
 import matplotlib.image as mpimg
 import matplotlib.pyplot as plt
 import numpy as np
@@ -8,12 +11,6 @@ import torch
 from loguru import logger
 from pgvector.psycopg import register_vector
 from transformers import CLIPModel, CLIPProcessor, CLIPTokenizerFast
-
-import math
-
-import matplotlib.image as mpimg
-import matplotlib.pyplot as plt
-
 
 def connect_to_database(dbname="retrieval_db"):
     conn = psycopg.connect(dbname=dbname, autocommit=True)
@@ -76,19 +73,15 @@ def execute_query(conn, sql, query, embedding, k):
         sql, {"query": query, "embedding": embedding, "k": k}
     ).fetchall()
     return results
-
-
-
-
-
 def plot_results(results, image_dir="./saved_images_coco_30k/"):
     num_images = len(results)
     num_cols = 4
     num_rows = math.ceil(num_images / num_cols)
 
     fig, axs = plt.subplots(num_rows, num_cols, figsize=(15, 5 * num_rows))
-    axs = axs.flatten()  # Flatten the 2D array of axes to make indexing easier
+    axs = axs.flatten()
 
+    output_images = []
     for i, row in enumerate(results):
         if i >= len(axs):
             break
@@ -100,46 +93,63 @@ def plot_results(results, image_dir="./saved_images_coco_30k/"):
         axs[i].imshow(img)
         axs[i].axis("off")
         axs[i].set_title(f"{image_filename} | {rrf_score:.4f}", fontsize=10)
+        
+        output_images.append((image_filepath, f"{image_filename} | {rrf_score:.4f}"))
 
-    # Hide any unused subplots
     for j in range(i + 1, len(axs)):
         axs[j].axis("off")
         axs[j].set_visible(False)
 
     fig.suptitle("Retrieval Results (filename|RRF score)")
     plt.tight_layout(pad=4.0)
-    plt.savefig("images/results.png")
+    plt.close(fig)
 
-    plt.show()
+    return output_images
 
-
-def parse_arguments():
-    parser = argparse.ArgumentParser(description="Image retrieval based on text query")
-    parser.add_argument("query", type=str, help="Text query for image retrieval")
-    # add num_results argument
-    parser.add_argument(
-        "--num_results", type=int, default=12, help="Number of images to retrieve"
-    )
-    return parser.parse_args()
-
-
-def main():
-    args = parse_arguments()
-
+def image_retrieval(query, num_results=12):
     conn = connect_to_database()
-
     device, tokenizer, processor, model = initialize_model()
-
-    query = args.query
-    num_results = args.num_results
+    
     text_emb = tokenize_text(query, tokenizer, model, device)
 
     k = 60
     sql = get_sql_query(num_results)
     results = execute_query(conn, sql, query, text_emb, k)
 
-    plot_results(results)
+    return plot_results(results)
 
+
+
+def gradio_interface(query, num_results):
+    results = image_retrieval(query, num_results)
+    images = [img[0] for img in results]
+    captions = [img[1] for img in results]
+    return images
+
+# Set up the Gradio interface
+with gr.Blocks() as iface:
+    gr.Markdown("Hybrid Search using CLIP and Keyword Search with RRF")
+    gr.Markdown("Enter a text query to retrieve relevant images.")
+    
+    with gr.Row():
+        query_input = gr.Textbox(label="Enter your query")
+        num_results = gr.Slider(minimum=1, maximum=20, step=1, value=12, label="Number of results")
+    submit_btn = gr.Button("Retrieve Images")
+    
+    gallery = gr.Gallery(
+        label="Retrieved Images",
+        show_label=True,
+        columns=4,
+        # rows=3,
+        # height="auto",
+        object_fit="contain"
+    )
+    
+    submit_btn.click(
+        fn=gradio_interface,
+        inputs=[query_input, num_results],
+        outputs=gallery
+    )
 
 if __name__ == "__main__":
-    main()
+    iface.launch(share=True)
