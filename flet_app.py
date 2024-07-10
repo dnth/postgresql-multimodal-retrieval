@@ -124,6 +124,12 @@ def main(page: ft.Page):
     page.theme_mode = "light"
 
     def search_images(e):
+        if not query_input.value:
+            query_input.error_text = "Query cannot be empty"
+            page.update()
+            return
+
+        query_input.error_text = None  # Clear any previous error
         query = query_input.value
         num_results = int(num_results_slider.value)
         results = image_retrieval(query, num_results)
@@ -141,8 +147,23 @@ def main(page: ft.Page):
             )
         page.update()
 
-    query_input = ft.TextField(label="Enter your query")
-    num_results_slider = ft.Slider(min=1, max=20, value=12, label="Number of results")
+    def update_slider_value(e):
+        slider_value.value = f"Number of results: {int(e.control.value)}"
+        page.update()
+
+    query_input = ft.TextField(
+        label="Enter your query",
+        hint_text="Type your search query here",
+        on_change=lambda _: setattr(query_input, 'error_text', None)
+    )
+    num_results_slider = ft.Slider(
+        min=1, 
+        max=20, 
+        value=12, 
+        label="Number of results",
+        on_change=update_slider_value
+    )
+    slider_value = ft.Text(f"Number of results: {int(num_results_slider.value)}")
     submit_btn = ft.ElevatedButton("Retrieve Images", on_click=search_images)
     
     image_gallery = ft.Row(
@@ -154,9 +175,8 @@ def main(page: ft.Page):
 
     page.add(
         ft.Text("Hybrid Search using CLIP and Keyword Search with RRF", size=20),
-        ft.Text("Enter a text query to retrieve relevant images."),
         query_input,
-        num_results_slider,
+        ft.Row([num_results_slider, slider_value]),
         submit_btn,
         image_gallery
     )
