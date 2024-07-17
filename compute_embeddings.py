@@ -9,6 +9,7 @@ from pgvector.psycopg import register_vector
 from tqdm.auto import tqdm
 from transformers import CLIPModel, CLIPProcessor, CLIPTokenizerFast
 
+from src.database import PostgreSQLDatabase
 
 def save_image_to_disk(example, save_dir):
     filename = f"{example['image_id']}.jpg"
@@ -130,7 +131,8 @@ def main():
 
     device, tokenizer, processor, model = initialize_model()
 
-    image_arr = compute_embeddings(images, processor, model, device)
+    # image_arr = compute_embeddings(images, processor, model, device)
+    image_arr = np.load("image_embeddings.npy")
 
     # Normalize embeddings
     image_arr = image_arr.T / np.linalg.norm(image_arr, axis=1)
@@ -141,8 +143,10 @@ def main():
     logger.info(f"Embeddings saved to {embeddings_file}")
 
     # insert embeddings to database
-    logger.info("Inserting embeddings to database")
-    insert_to_db(dataset, image_arr)
+    # logger.info("Inserting embeddings to database")
+    # insert_to_db(dataset, image_arr)
+    db = PostgreSQLDatabase("retrieval_db")
+    db.insert_data(dataset, image_arr)
 
 
 if __name__ == "__main__":
