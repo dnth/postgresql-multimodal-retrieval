@@ -11,13 +11,13 @@ class HuggingFaceDatasets:
     """
 
     def __init__(
-        self, dataset_name: str, num_images: int = None, **load_dataset_kwargs
+        self, dataset_name: str, num_images: int = None
     ):
         self.dataset_name = dataset_name
         logger.info(f"Loading dataset: {dataset_name}")
 
         self.dataset = load_dataset(
-            self.dataset_name, split="all", **load_dataset_kwargs
+            self.dataset_name, split="all"
         )
 
         if num_images:

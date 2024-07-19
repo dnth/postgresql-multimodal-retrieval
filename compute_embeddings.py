@@ -7,8 +7,9 @@ from loguru import logger
 from tqdm.auto import tqdm
 from transformers import CLIPModel, CLIPProcessor, CLIPTokenizerFast
 
-from src.database import PostgreSQLDatabase
-from src.datasets import HuggingFaceDatasets
+
+from pgmmr.database import PostgreSQLDatabase
+from pgmmr.datasets import HuggingFaceDatasets
 
 from PIL import Image
 
