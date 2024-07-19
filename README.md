@@ -53,6 +53,10 @@ createdb retrieval_db -O retrieval_user
 ```bash
 pip install -r requirements.txt
 ```
+Install the pgmmr package
+```
+pip install -e .
+```
 
 ## Usage
 
