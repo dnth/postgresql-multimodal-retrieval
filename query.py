@@ -36,14 +36,6 @@ def hybrid_search(num_results: int = 12):
     """
 
 
-def tokenize_text(query, tokenizer, model, device):
-    logger.info(f"Tokenizing text: {query}")
-    inputs = tokenizer(query, return_tensors="pt").to(device)
-    text_emb = model.get_text_features(**inputs)
-    text_emb = text_emb.cpu().detach().numpy()
-    return text_emb.flatten()
-
-
 def execute_query(conn, sql, query, embedding, k):
     logger.info("Executing vector search")
     results = conn.execute(
