@@ -37,7 +37,7 @@ def hybrid_search(num_results: int = 12):
 
 
 def execute_query(conn, sql, query, embedding, k):
-    logger.info("Executing vector search")
+    logger.info("Executing search")
     results = conn.execute(
         sql, {"query": query, "embedding": embedding, "k": k}
     ).fetchall()
@@ -88,15 +88,12 @@ def parse_arguments():
 def main():
     args = parse_arguments()
 
-    db = PostgreSQLDatabase("retrieval_db")
-    db.connect()
-    db.setup_pgvector_extension()
-
     clip = CLIP(model_id="openai/clip-vit-base-patch32", device="cpu")
     text_embeddings = clip.encode_text(args.query)
 
-    sql = hybrid_search(args.num_results)
-    results = execute_query(db.conn, sql, args.query, text_embeddings, k=60)
+    with PostgreSQLDatabase("retrieval_db") as db:
+        sql = hybrid_search(args.num_results)
+        results = execute_query(db.conn, sql, args.query, text_embeddings, k=60)
 
     plot_results(results)
 

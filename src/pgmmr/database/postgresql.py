@@ -12,6 +12,18 @@ class PostgreSQLDatabase:
         self.conn = None
         self.cur = None
 
+    def __enter__(self):
+        self.connect()
+        self.setup_pgvector_extension()
+        return self
+    
+    def __exit__(self, exc_type, exc_val, exc_tb):
+        self.disconnect()
+        if exc_type:
+            logger.error(f"Error: {exc_type} - {exc_val}")
+            return False
+        return True
+
     def connect(self):
         try:
             self.conn = psycopg.connect(dbname=self.database_name)
@@ -57,8 +69,7 @@ class PostgreSQLDatabase:
             raise
 
     def insert_data(self, df: pd.DataFrame , embeddings: np.ndarray):
-        self.connect()
-        self.setup_pgvector_extension()
+        
         self.create_table()
 
         df["image_filepath"] = df["image_filepath"].apply(lambda x: x.split("/")[-1])
@@ -86,7 +97,4 @@ class PostgreSQLDatabase:
 
         self.cur.executemany(insert_sql, data)
         self.conn.commit()
-
-        self.disconnect()
-
         logger.info("Data inserted successfully!")

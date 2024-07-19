@@ -15,9 +15,8 @@ def main():
     image_embeddings = clip.encode_image(image_filepaths, batch_size=256)
 
     # Load into database
-    db = PostgreSQLDatabase("retrieval_db")
-    db.insert_data(dataset_df, image_embeddings)
-
+    with PostgreSQLDatabase("retrieval_db") as db:
+        db.insert_data(dataset_df, image_embeddings)
 
 if __name__ == "__main__":
     main()
