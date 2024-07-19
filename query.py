@@ -1,23 +1,12 @@
 import argparse
-
-import matplotlib.image as mpimg
-import matplotlib.pyplot as plt
-import psycopg
-from loguru import logger
-from pgvector.psycopg import register_vector
-
 import math
 
 import matplotlib.image as mpimg
 import matplotlib.pyplot as plt
+from loguru import logger
 
-from pgmmr.models import CLIP
 from pgmmr.database import PostgreSQLDatabase
-
-def connect_to_database(dbname="retrieval_db"):
-    conn = psycopg.connect(dbname=dbname, autocommit=True)
-    register_vector(conn)
-    return conn
+from pgmmr.models import CLIP
 
 
 def hybrid_search(num_results: int = 12):
@@ -61,9 +50,6 @@ def execute_query(conn, sql, query, embedding, k):
         sql, {"query": query, "embedding": embedding, "k": k}
     ).fetchall()
     return results
-
-
-
 
 
 def plot_results(results, image_dir="./saved_images_coco_30k/"):
