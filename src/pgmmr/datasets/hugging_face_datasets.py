@@ -17,7 +17,7 @@ class HuggingFaceDatasets:
 
         self.dataset = load_dataset(self.dataset_name, split="all")
 
-    def save_dataset_images(self, save_dir: str, num_images: int = None):
+    def save_images(self, save_dir: str, num_images: int = None):
         logger.info(f"Saving images to folder: {save_dir}")
 
         def save_image_to_disk(example, save_dir):

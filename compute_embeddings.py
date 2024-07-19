@@ -6,7 +6,7 @@ from pgmmr.models import CLIP
 def main():
     # Get dataset
     ds = HuggingFaceDatasets("UCSC-VLAA/Recap-COCO-30K")
-    ds.save_dataset_images("saved_images_coco_30k", num_images=1000)
+    ds.save_images("saved_images_coco_30k", num_images=1000)
 
     # Load model
     clip = CLIP(model_id="openai/clip-vit-base-patch32")
