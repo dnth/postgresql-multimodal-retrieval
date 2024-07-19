@@ -7,13 +7,18 @@ from transformers import CLIPModel, CLIPProcessor, CLIPTokenizerFast
 
 
 class CLIP:
-    def __init__(self, model_id: str = "openai/clip-vit-base-patch32") -> None:
+    def __init__(self, model_id: str = "openai/clip-vit-base-patch32", device: str = None) -> None:
         logger.info(f"Initializing CLIP model: {model_id}")
-        self.device = (
-            "cuda"
-            if torch.cuda.is_available()
-            else ("mps" if torch.backends.mps.is_available() else "cpu")
-        )
+        if device is None:
+            self.device = (
+                "cuda"
+                if torch.cuda.is_available()
+                else ("mps" if torch.backends.mps.is_available() else "cpu")
+            )
+        else:
+            self.device = device
+        
+        logger.info(f"Using device: {self.device}")
 
         self.tokenizer = CLIPTokenizerFast.from_pretrained(model_id)
         self.processor = CLIPProcessor.from_pretrained(model_id)
@@ -59,3 +64,10 @@ class CLIP:
             f"Finished processing. Final embedding shape: {image_embeddings.shape}"
         )
         return image_embeddings
+
+    def encode_text(self, text: str) -> np.ndarray:
+        logger.info(f"Computing text embedding for: {text}")
+        inputs = self.tokenizer(text, return_tensors="pt").to(self.device)
+        text_emb = self.model.get_text_features(**inputs)
+        text_emb = text_emb.cpu().detach().numpy()
+        return text_emb.flatten()
