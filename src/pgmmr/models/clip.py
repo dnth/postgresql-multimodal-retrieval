@@ -11,14 +11,13 @@ class CLIP:
         self, model_id: str = "openai/clip-vit-base-patch32", device: str = None
     ) -> None:
         logger.info(f"Initializing CLIP model: {model_id}")
-        if device is None:
-            self.device = (
-                "cuda"
-                if torch.cuda.is_available()
-                else ("mps" if torch.backends.mps.is_available() else "cpu")
-            )
-        else:
-            self.device = device
+        self.device = device or (
+            "cuda"
+            if torch.cuda.is_available()
+            else "mps"
+            if torch.backends.mps.is_available()
+            else "cpu"
+        )
 
         logger.info(f"Using device: {self.device}")
 
