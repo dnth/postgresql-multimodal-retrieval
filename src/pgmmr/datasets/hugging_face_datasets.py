@@ -19,6 +19,8 @@ class HuggingFaceDatasets:
 
     def save_images(self, save_dir: str, num_images: int = None):
         logger.info(f"Saving images to folder: {save_dir}")
+        if num_images is not None:
+            logger.info(f"Saving a subset of {num_images} images")
 
         def save_image_to_disk(example, save_dir):
             filename = f"{example['image_id']}.jpg"
