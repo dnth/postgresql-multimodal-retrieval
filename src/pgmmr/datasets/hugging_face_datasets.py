@@ -1,8 +1,10 @@
 import os
 
-from loguru import logger
-
+import pandas as pd
 from datasets import load_dataset
+
+
+from loguru import logger
 
 
 class HuggingFaceDatasets:
@@ -10,15 +12,11 @@ class HuggingFaceDatasets:
     Class to handle Hugging Face datasets, loading and processing them.
     """
 
-    def __init__(
-        self, dataset_name: str, num_images: int = None
-    ):
+    def __init__(self, dataset_name: str, num_images: int = None):
         self.dataset_name = dataset_name
         logger.info(f"Loading dataset: {dataset_name}")
 
-        self.dataset = load_dataset(
-            self.dataset_name, split="all"
-        )
+        self.dataset = load_dataset(self.dataset_name, split="all")
 
         if num_images:
             logger.info(f"Subsetting dataset to {num_images} images")
@@ -41,6 +39,6 @@ class HuggingFaceDatasets:
     def get_image_paths(self) -> list[str]:
         return self.dataset["image_filepath"]
 
-    def to_pandas(self):
+    def to_pandas(self) -> pd.DataFrame:
         self.dataset = self.dataset.remove_columns(["image"])
         return self.dataset.to_pandas()

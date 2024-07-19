@@ -1,16 +1,14 @@
-import argparse
 import math
-import os
 
 import gradio as gr
 import matplotlib.image as mpimg
 import matplotlib.pyplot as plt
-import numpy as np
 import psycopg
 import torch
 from loguru import logger
 from pgvector.psycopg import register_vector
 from transformers import CLIPModel, CLIPProcessor, CLIPTokenizerFast
+
 
 def connect_to_database(dbname="retrieval_db"):
     conn = psycopg.connect(dbname=dbname, autocommit=True)
@@ -73,6 +71,8 @@ def execute_query(conn, sql, query, embedding, k):
         sql, {"query": query, "embedding": embedding, "k": k}
     ).fetchall()
     return results
+
+
 def plot_results(results, image_dir="./saved_images_coco_30k/"):
     num_images = len(results)
     num_cols = 4
@@ -93,7 +93,7 @@ def plot_results(results, image_dir="./saved_images_coco_30k/"):
         axs[i].imshow(img)
         axs[i].axis("off")
         axs[i].set_title(f"{image_filename} | {rrf_score:.4f}", fontsize=10)
-        
+
         output_images.append((image_filepath, f"{image_filename} | {rrf_score:.4f}"))
 
     for j in range(i + 1, len(axs)):
@@ -106,10 +106,11 @@ def plot_results(results, image_dir="./saved_images_coco_30k/"):
 
     return output_images
 
+
 def image_retrieval(query, num_results=12):
     conn = connect_to_database()
     device, tokenizer, processor, model = initialize_model()
-    
+
     text_emb = tokenize_text(query, tokenizer, model, device)
 
     k = 60
@@ -119,36 +120,36 @@ def image_retrieval(query, num_results=12):
     return plot_results(results)
 
 
-
 def gradio_interface(query, num_results):
     results = image_retrieval(query, num_results)
     images = [img[0] for img in results]
-    captions = [img[1] for img in results]
+    # captions = [img[1] for img in results]
     return images
+
 
 # Set up the Gradio interface
 with gr.Blocks() as iface:
     gr.Markdown("Hybrid Search using CLIP and Keyword Search with RRF")
     gr.Markdown("Enter a text query to retrieve relevant images.")
-    
+
     with gr.Row():
         query_input = gr.Textbox(label="Enter your query")
-        num_results = gr.Slider(minimum=1, maximum=20, step=1, value=12, label="Number of results")
+        num_results = gr.Slider(
+            minimum=1, maximum=20, step=1, value=12, label="Number of results"
+        )
     submit_btn = gr.Button("Retrieve Images")
-    
+
     gallery = gr.Gallery(
         label="Retrieved Images",
         show_label=True,
         columns=4,
         # rows=3,
         # height="auto",
-        object_fit="contain"
+        object_fit="contain",
     )
-    
+
     submit_btn.click(
-        fn=gradio_interface,
-        inputs=[query_input, num_results],
-        outputs=gallery
+        fn=gradio_interface, inputs=[query_input, num_results], outputs=gallery
     )
 
 if __name__ == "__main__":

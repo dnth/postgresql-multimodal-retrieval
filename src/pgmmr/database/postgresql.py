@@ -16,7 +16,7 @@ class PostgreSQLDatabase:
         self.connect()
         self.setup_pgvector_extension()
         return self
-    
+
     def __exit__(self, exc_type, exc_val, exc_tb):
         self.disconnect()
         if exc_type:
@@ -68,8 +68,7 @@ class PostgreSQLDatabase:
             logger.error(f"Error creating table: {e}")
             raise
 
-    def insert_data(self, df: pd.DataFrame , embeddings: np.ndarray):
-        
+    def insert_data(self, df: pd.DataFrame, embeddings: np.ndarray):
         self.create_table()
 
         df["image_filepath"] = df["image_filepath"].apply(lambda x: x.split("/")[-1])

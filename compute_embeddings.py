@@ -18,5 +18,6 @@ def main():
     with PostgreSQLDatabase("retrieval_db") as db:
         db.insert_data(dataset_df, image_embeddings)
 
+
 if __name__ == "__main__":
     main()

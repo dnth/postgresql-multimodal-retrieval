@@ -7,7 +7,9 @@ from transformers import CLIPModel, CLIPProcessor, CLIPTokenizerFast
 
 
 class CLIP:
-    def __init__(self, model_id: str = "openai/clip-vit-base-patch32", device: str = None) -> None:
+    def __init__(
+        self, model_id: str = "openai/clip-vit-base-patch32", device: str = None
+    ) -> None:
         logger.info(f"Initializing CLIP model: {model_id}")
         if device is None:
             self.device = (
@@ -17,7 +19,7 @@ class CLIP:
             )
         else:
             self.device = device
-        
+
         logger.info(f"Using device: {self.device}")
 
         self.tokenizer = CLIPTokenizerFast.from_pretrained(model_id)
