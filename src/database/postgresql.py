@@ -3,7 +3,7 @@ import psycopg
 from loguru import logger
 from pgvector.psycopg import register_vector
 
-import datasets
+import pandas as pd
 
 
 class PostgreSQLDatabase:
@@ -56,16 +56,12 @@ class PostgreSQLDatabase:
             logger.error(f"Error creating table: {e}")
             raise
 
-    def insert_data(self, dataset: datasets.Dataset, embeddings: np.ndarray):
+    def insert_data(self, df: pd.DataFrame , embeddings: np.ndarray):
         self.connect()
         self.setup_pgvector_extension()
         self.create_table()
 
-        df = dataset["train"].to_pandas()
-        df = df.drop(columns=["image"])
-
         df["image_filepath"] = df["image_filepath"].apply(lambda x: x.split("/")[-1])
-
         df["img_emb"] = embeddings.T.tolist()
 
         # Prepare the insert statement

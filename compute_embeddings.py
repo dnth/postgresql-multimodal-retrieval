@@ -2,12 +2,15 @@ import os
 
 import numpy as np
 import torch
-from datasets import load_dataset
+
 from loguru import logger
 from tqdm.auto import tqdm
 from transformers import CLIPModel, CLIPProcessor, CLIPTokenizerFast
 
 from src.database import PostgreSQLDatabase
+from src.datasets import HuggingFaceDatasets
+
+from PIL import Image
 
 def save_image_to_disk(example, save_dir):
     filename = f"{example['image_id']}.jpg"
@@ -32,19 +35,35 @@ def initialize_model(model_id="openai/clip-vit-base-patch32"):
     return device, tokenizer, processor, model
 
 
-def compute_embeddings(images, processor, model, device, batch_size=128):
-    logger.info("Computing image embeddings")
+def compute_embeddings(image_paths, processor, model, device, batch_size=128):
+    logger.info(f"Computing image embeddings in batches of {batch_size}")
     image_arr = None
+    
+    for i in tqdm(range(0, len(image_paths), batch_size)):
+        batch_paths = image_paths[i : i + batch_size]
+        
+        # Load and process images
+        batch_images = []
+        for path in batch_paths:
+            try:
+                img = Image.open(path).convert('RGB')
+                batch_images.append(img)
+            except Exception as e:
+                logger.error(f"Error loading image {path}: {str(e)}")
+                continue
 
-    logger.info(f"Processing images in batches of {batch_size}")
-    for i in tqdm(range(0, len(images), batch_size)):
-        batch = images[i : i + batch_size]
-        batch = processor(text=None, images=batch, return_tensors="pt", padding=True)[
+        if not batch_images:
+            logger.warning(f"No valid images in batch starting at index {i}")
+            continue
+
+        batch = processor(text=None, images=batch_images, return_tensors="pt", padding=True)[
             "pixel_values"
         ].to(device)
+        
         batch_emb = model.get_image_features(pixel_values=batch)
         batch_emb = batch_emb.squeeze(0)
         batch_emb = batch_emb.cpu().detach().numpy()
+        
         if image_arr is None:
             image_arr = batch_emb
         else:
@@ -55,24 +74,15 @@ def compute_embeddings(images, processor, model, device, batch_size=128):
 
 
 def main():
-    logger.info("Loading dataset")
-    dataset = load_dataset("UCSC-VLAA/Recap-COCO-30K")
 
-    save_dir = "./saved_images_coco_30k/"
-    os.makedirs(save_dir, exist_ok=True)
-    logger.info(f"Saving images to {save_dir}")
-
-    # Only process the first 100 images for testing and debugging
-    # dataset["train"] = dataset["train"].select(range(100))
-    dataset = dataset.map(lambda x: save_image_to_disk(x, save_dir))
-
-    logger.info("Extracting images from dataset")
-    images = [dataset["train"][i]["image"] for i in range(len(dataset["train"]))]
-    logger.info(f"Total images: {len(images)}")
+    ds = HuggingFaceDatasets("UCSC-VLAA/Recap-COCO-30K")
+    ds.save_dataset_images('saved_images_coco_30k')
+    image_filepaths = ds.get_image_paths()
+    dataset_df = ds.to_pandas()
 
     device, tokenizer, processor, model = initialize_model()
 
-    image_arr = compute_embeddings(images, processor, model, device)
+    image_arr = compute_embeddings(image_filepaths, processor, model, device, batch_size=256)
     # image_arr = np.load("image_embeddings.npy")
 
     # Normalize embeddings
@@ -84,10 +94,8 @@ def main():
     logger.info(f"Embeddings saved to {embeddings_file}")
 
     db = PostgreSQLDatabase("retrieval_db")
-    db.insert_data(dataset, image_arr)
+    db.insert_data(dataset_df, image_arr)
 
 
 if __name__ == "__main__":
-    logger.info("Starting main process")
     main()
-    logger.info("Process completed")
