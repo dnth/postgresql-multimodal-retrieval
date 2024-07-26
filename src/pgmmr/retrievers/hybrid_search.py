@@ -1,15 +1,16 @@
 from loguru import logger
+from typing import List, Tuple, Any
 
 
 class HybridSearch:
-    def __init__(self, conn, model, num_results=12, k=60):
+    def __init__(self, conn, model, num_results: int = 12, k: int = 60):
         self.conn = conn
         self.model = model
 
         self.num_results = num_results
         self.k = k
 
-    def generate_sql(self) -> str:
+    def build_search_query(self) -> str:
         return f"""
         WITH semantic_search AS (
             SELECT image_id, image_filepath, RANK () OVER (ORDER BY img_emb <=> %(embedding)s) AS rank
@@ -35,12 +36,16 @@ class HybridSearch:
         LIMIT {self.num_results}
         """
 
-    def search(self, query):
+    def search(self, query: str) -> List[Tuple[Any]]:
         logger.info("Executing search")
-        input_text_embeddings = self.model.encode_text(query)
-        sql = self.generate_sql()
-        results = self.conn.execute(
-            sql, {"query": query, "embedding": input_text_embeddings, "k": self.k}
-        ).fetchall()
+        try:
+            input_text_embeddings = self.model.encode_text(query)
+            sql = self.build_search_query()
+            results = self.conn.execute(
+                sql, {"query": query, "embedding": input_text_embeddings, "k": self.k}
+            ).fetchall()
 
-        return results
+            return results
+        except Exception as e:
+            logger.error(f"Error executing search: {str(e)}")
+            raise
