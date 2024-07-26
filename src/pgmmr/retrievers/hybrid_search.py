@@ -2,8 +2,9 @@ from loguru import logger
 
 
 class HybridSearch:
-    def __init__(self, conn, num_results=12, k=60):
+    def __init__(self, conn, model, num_results=12, k=60):
         self.conn = conn
+        self.model = model
 
         self.num_results = num_results
         self.k = k
@@ -34,9 +35,9 @@ class HybridSearch:
         LIMIT {self.num_results}
         """
 
-    def search(self, query, input_text_embeddings):
+    def search(self, query):
         logger.info("Executing search")
-
+        input_text_embeddings = self.model.encode_text(query)
         sql = self.generate_sql()
         results = self.conn.execute(
             sql, {"query": query, "embedding": input_text_embeddings, "k": self.k}

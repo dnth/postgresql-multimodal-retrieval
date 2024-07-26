@@ -55,12 +55,13 @@ def parse_arguments():
 def main():
     args = parse_arguments()
 
-    clip = CLIP(model_id="openai/clip-vit-base-patch32", device="cpu")
-    input_text_embeddings = clip.encode_text(args.query)
-
     with PostgreSQLDatabase("retrieval_db") as db:
-        search_engine = HybridSearch(db.conn, num_results=args.num_results)
-        results = search_engine.search(args.query, input_text_embeddings)
+        search_engine = HybridSearch(
+            db.conn,
+            model=CLIP(model_id="openai/clip-vit-base-patch32", device="cpu"),
+            num_results=args.num_results,
+        )
+        results = search_engine.search(args.query)
 
     plot_results(results)
 
