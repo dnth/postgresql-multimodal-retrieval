@@ -3,45 +3,12 @@ import math
 
 import matplotlib.image as mpimg
 import matplotlib.pyplot as plt
-from loguru import logger
+
 
 from pgmmr.database import PostgreSQLDatabase
 from pgmmr.models import CLIP
 
-
-def hybrid_search(num_results: int = 12):
-    return f"""
-    WITH semantic_search AS (
-        SELECT image_id, image_filepath, RANK () OVER (ORDER BY img_emb <=> %(embedding)s) AS rank
-        FROM image_metadata
-        ORDER BY img_emb <=> %(embedding)s
-        LIMIT 20
-    ),
-    keyword_search AS (
-        SELECT image_id, image_filepath, RANK () OVER (ORDER BY ts_rank_cd(to_tsvector('english', recaption), query) DESC)
-        FROM image_metadata, plainto_tsquery('english', %(query)s) query
-        WHERE to_tsvector('english', recaption) @@ query
-        ORDER BY ts_rank_cd(to_tsvector('english', recaption), query) DESC
-        LIMIT 20
-    )
-    SELECT
-        COALESCE(semantic_search.image_id, keyword_search.image_id) AS id,
-        COALESCE(semantic_search.image_filepath, keyword_search.image_filepath) AS image_filepath,
-        COALESCE(1.0 / (%(k)s + semantic_search.rank), 0.0) +
-        COALESCE(1.0 / (%(k)s + keyword_search.rank), 0.0) AS score
-    FROM semantic_search
-    FULL OUTER JOIN keyword_search ON semantic_search.image_id = keyword_search.image_id
-    ORDER BY score DESC
-    LIMIT {num_results}
-    """
-
-
-def execute_query(conn, sql, query, embedding, k):
-    logger.info("Executing search")
-    results = conn.execute(
-        sql, {"query": query, "embedding": embedding, "k": k}
-    ).fetchall()
-    return results
+from pgmmr.retrievers.hybrid_search import HybridSearch
 
 
 def plot_results(results, image_dir="./saved_images_coco_30k/"):
@@ -89,11 +56,11 @@ def main():
     args = parse_arguments()
 
     clip = CLIP(model_id="openai/clip-vit-base-patch32", device="cpu")
-    text_embeddings = clip.encode_text(args.query)
+    input_text_embeddings = clip.encode_text(args.query)
 
     with PostgreSQLDatabase("retrieval_db") as db:
-        sql = hybrid_search(args.num_results)
-        results = execute_query(db.conn, sql, args.query, text_embeddings, k=60)
+        search_engine = HybridSearch(db.conn, num_results=args.num_results)
+        results = search_engine.search(args.query, input_text_embeddings)
 
     plot_results(results)
 
