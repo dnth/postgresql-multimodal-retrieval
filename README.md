@@ -1,6 +1,8 @@
 # postgresql-multimodal-retrieval
 Multimodal retrieval using Vision Language Model with PostgreSQL database - A full stack implementation.
 
+![img](/images/workflow.png)
+
 + Database: PostgreSQL
 + Vision Language Model: OpenAI CLIP (`transformers` implementation) 
 + Dataset: Hugging Face Datasets
