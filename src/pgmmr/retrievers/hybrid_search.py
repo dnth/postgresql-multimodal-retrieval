@@ -5,6 +5,10 @@ from .result import Result
 
 
 class HybridSearch:
+    """
+    Hybrid search class that combines caption vector search and caption keyword search
+    """
+
     def __init__(self, conn, model, num_results: int = 12, k: int = 60):
         self.conn = conn
         self.model = model
@@ -14,13 +18,13 @@ class HybridSearch:
 
     def build_search_query(self) -> str:
         return f"""
-        WITH semantic_search AS (
+        WITH text_to_image_vector_search AS (
             SELECT image_id, image_filepath, RANK () OVER (ORDER BY img_emb <=> %(embedding)s) AS rank
             FROM image_metadata
             ORDER BY img_emb <=> %(embedding)s
             LIMIT {self.num_results}
         ),
-        keyword_search AS (
+        caption_keyword_search AS (
             SELECT image_id, image_filepath, RANK () OVER (ORDER BY ts_rank_cd(to_tsvector('english', recaption), query) DESC)
             FROM image_metadata, plainto_tsquery('english', %(query)s) query
             WHERE to_tsvector('english', recaption) @@ query
@@ -28,12 +32,12 @@ class HybridSearch:
             LIMIT {self.num_results}
         )
         SELECT
-            COALESCE(semantic_search.image_id, keyword_search.image_id) AS id,
-            COALESCE(semantic_search.image_filepath, keyword_search.image_filepath) AS image_filepath,
-            COALESCE(1.0 / (%(k)s + semantic_search.rank), 0.0) +
-            COALESCE(1.0 / (%(k)s + keyword_search.rank), 0.0) AS score
-        FROM semantic_search
-        FULL OUTER JOIN keyword_search ON semantic_search.image_id = keyword_search.image_id
+            COALESCE(text_to_image_vector_search.image_id, caption_keyword_search.image_id) AS id,
+            COALESCE(text_to_image_vector_search.image_filepath, caption_keyword_search.image_filepath) AS image_filepath,
+            COALESCE(1.0 / (%(k)s + text_to_image_vector_search.rank), 0.0) +
+            COALESCE(1.0 / (%(k)s + caption_keyword_search.rank), 0.0) AS score
+        FROM text_to_image_vector_search
+        FULL OUTER JOIN caption_keyword_search ON text_to_image_vector_search.image_id = caption_keyword_search.image_id
         ORDER BY score DESC
         LIMIT {self.num_results}
         """
