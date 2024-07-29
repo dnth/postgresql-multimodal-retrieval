@@ -1,6 +1,16 @@
 from loguru import logger
-from typing import List, Tuple, Any
+from typing import List
 import time
+from decimal import Decimal
+
+from dataclasses import dataclass
+
+
+@dataclass
+class Result:
+    id: int
+    image_filename: str
+    rrf_score: Decimal
 
 
 class HybridSearch:
@@ -37,17 +47,21 @@ class HybridSearch:
         LIMIT {self.num_results}
         """
 
-    def search(self, query: str) -> List[Tuple[Any]]:
+    def search(self, query: str) -> List[Result]:
         logger.info("Executing search")
         try:
-            t = time.time()
             input_text_embeddings = self.model.encode_text(query)
             sql = self.build_search_query()
+            t = time.time()
             results = self.conn.execute(
                 sql, {"query": query, "embedding": input_text_embeddings, "k": self.k}
             ).fetchall()
 
             logger.info(f"Search executed in {time.time() - t:.4f} seconds")
+            results = [
+                Result(id=row[0], image_filename=row[1], rrf_score=row[2])
+                for row in results
+            ]
 
             return results
         except Exception as e:

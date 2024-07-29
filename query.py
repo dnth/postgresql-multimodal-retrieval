@@ -8,10 +8,12 @@ import matplotlib.pyplot as plt
 from pgmmr.database import PostgreSQLDatabase
 from pgmmr.models import CLIP
 
-from pgmmr.retrievers.hybrid_search import HybridSearch
+from pgmmr.retrievers.hybrid_search import HybridSearch, Result
+
+from typing import List
 
 
-def plot_results(results, image_dir="./saved_images_coco_30k/"):
+def plot_results(results: List[Result], image_dir="./saved_images_coco_30k/"):
     num_images = len(results)
     num_cols = 4
     num_rows = math.ceil(num_images / num_cols)
@@ -19,17 +21,19 @@ def plot_results(results, image_dir="./saved_images_coco_30k/"):
     fig, axs = plt.subplots(num_rows, num_cols, figsize=(15, 5 * num_rows))
     axs = axs.flatten()  # Flatten the 2D array of axes to make indexing easier
 
-    for i, row in enumerate(results):
+    for i, result in enumerate(results):
         if i >= len(axs):
             break
 
-        image_filename = row[1]
-        rrf_score = row[2]
-        image_filepath = f"{image_dir}{image_filename}"
+        # image_filename = row[1]
+        # rrf_score = row[2]
+        image_filepath = f"{image_dir}{result.image_filename}"
         img = mpimg.imread(image_filepath)
         axs[i].imshow(img)
         axs[i].axis("off")
-        axs[i].set_title(f"{image_filename} | {rrf_score:.4f}", fontsize=10)
+        axs[i].set_title(
+            f"{result.image_filename} | {result.rrf_score:.4f}", fontsize=10
+        )
 
     # Hide any unused subplots
     for j in range(i + 1, len(axs)):
