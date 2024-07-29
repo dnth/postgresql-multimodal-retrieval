@@ -1,5 +1,6 @@
 from loguru import logger
 from typing import List, Tuple, Any
+import time
 
 
 class HybridSearch:
@@ -39,11 +40,14 @@ class HybridSearch:
     def search(self, query: str) -> List[Tuple[Any]]:
         logger.info("Executing search")
         try:
+            t = time.time()
             input_text_embeddings = self.model.encode_text(query)
             sql = self.build_search_query()
             results = self.conn.execute(
                 sql, {"query": query, "embedding": input_text_embeddings, "k": self.k}
             ).fetchall()
+
+            logger.info(f"Search executed in {time.time() - t:.4f} seconds")
 
             return results
         except Exception as e:
