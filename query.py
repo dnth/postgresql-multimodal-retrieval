@@ -8,7 +8,8 @@ import matplotlib.pyplot as plt
 from pgmmr.database import PostgreSQLDatabase
 from pgmmr.models import CLIP
 
-from pgmmr.retrievers.hybrid_search import HybridSearch, Result
+from pgmmr.retrievers.hybrid_search import HybridSearch
+from pgmmr.retrievers.result import Result
 
 from typing import List
 
