@@ -25,8 +25,6 @@ def plot_results(results: List[Result], image_dir="./saved_images_coco_30k/"):
         if i >= len(axs):
             break
 
-        # image_filename = row[1]
-        # rrf_score = row[2]
         image_filepath = f"{image_dir}{result.image_filename}"
         img = mpimg.imread(image_filepath)
         axs[i].imshow(img)
